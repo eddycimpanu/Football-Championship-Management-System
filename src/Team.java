@@ -1,5 +1,5 @@
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class Team implements Comparable<Team> {
 
@@ -29,7 +29,7 @@ public class Team implements Comparable<Team> {
         this.goalsScored = 0;
         this.concededGoals = 0;
 
-        this.squad = new HashSet<>();
+        this.squad = new TreeSet<>();
         this.startingSix = new Player[6];
     }
 
@@ -114,4 +114,6 @@ public class Team implements Comparable<Team> {
     public Player[] getStartingSix() {
         return this.startingSix;
     }
+    public int getGoalsScored() { return this.goalsScored; }
+    public int getGoalsConceded() { return this.concededGoals; }
 }

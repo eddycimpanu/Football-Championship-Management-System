@@ -1,4 +1,4 @@
-public class Player extends Person {
+public class Player extends Person implements Comparable<Player> {
 
     private String position;
     private int kitNumber;
@@ -69,4 +69,9 @@ public class Player extends Person {
     public int getYellowCards() { return yellowCards; }
     public int getRedCards() { return redCards; }
     public int getCleanSheets() { return cleanSheets; }
+
+    @Override
+    public int compareTo(Player otherPlayer) {
+        return this.getLastName().compareTo(otherPlayer.getLastName());
+    }
 }

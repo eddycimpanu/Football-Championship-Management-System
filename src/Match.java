@@ -16,6 +16,7 @@ public class Match {
     private List<Player> awayOnField;
 
     private List<MatchEvent> events;
+    private int matchday;
 
     private int homeScore;
     private int awayScore;
@@ -52,6 +53,17 @@ public class Match {
         if (isFinished) {
             throw new IllegalStateException("Error: Cannot add events. The match is already finished!");
         }
+    }
+
+    public void setMatchday(int matchday) {
+        if (matchday <= 0) {
+            throw new IllegalArgumentException("Error: Matchday must be a positive number!");
+        }
+        this.matchday = matchday;
+    }
+
+    public int getMatchday() {
+        return matchday;
     }
 
     public void addGoal(int minute, Player scorer, Player assistant) {
@@ -131,6 +143,41 @@ public class Match {
                 m.addRedCard();
             }
         }
+    }
+
+    public void addSubstitution(int minute, Player playerOut, Player playerIn) {
+        _validateMatchState();
+
+        if (homeOnField.contains(playerOut)) {
+            if (!homeTeam.getSquad().contains(playerIn)) {
+                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " does not belong to the home team's squad!");
+            }
+
+            if (homeOnField.contains(playerIn)) {
+                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " is already on the field!");
+            }
+
+            homeOnField.remove(playerOut);
+            homeOnField.add(playerIn);
+
+        } else if (awayOnField.contains(playerOut)) {
+            if (!awayTeam.getSquad().contains(playerIn)) {
+                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " does not belong to the away team's squad!");
+            }
+
+            if (awayOnField.contains(playerIn)) {
+                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " is already on the field!");
+            }
+
+            awayOnField.remove(playerOut);
+            awayOnField.add(playerIn);
+
+        } else {
+            throw new IllegalArgumentException("Error: Player " + playerOut.getLastName() + " is not currently on the field!");
+        }
+
+        Substitution subEvent = new Substitution(minute, playerOut, playerIn);
+        events.add(subEvent);
     }
 
     public void finishMatch() {
