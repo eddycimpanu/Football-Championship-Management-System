@@ -1,5 +1,7 @@
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class LeagueService {
     private League league;
@@ -11,67 +13,73 @@ public class LeagueService {
         this.league = league;
     }
 
-    public void printDetailedStandings() {
-        List<Team> teams = league.getTeams();
-
-        if (teams.isEmpty()) {
-            System.out.println("No teams in the league!");
-            return;
-        }
-
-        Collections.sort(teams);
-
-        System.out.println("\n=== DETAILED STANDINGS ===");
-        for (int i = 0; i < teams.size(); i++) {
-            Team t = teams.get(i);
-
-            System.out.println((i + 1) + ". " + t.getName() + " - "
-                    + t.getPoints() + " points, "
-                    + t.getGoalsScored() + " goals scored, "
-                    + t.getGoalsConceded() + " goals conceded");
-        }
-        System.out.println("==========================\n");
-    }
-
     public void printStandings() {
-        List<Team> teams = league.getTeams();
-
-        if (teams.isEmpty()) {
-            System.out.println("No teams in the league!");
+        if (league.getTeams().isEmpty()) {
+            System.out.println("No teams in the league.");
             return;
         }
 
-        Collections.sort(teams);
-        System.out.println("\n=== LEAGUE STANDINGS ===");
-        for (int i = 0; i < teams.size(); i++) {
-            Team t = teams.get(i);
+        Set<Team> sortedTeams = new TreeSet<>(league.getTeams());
 
-            System.out.println((i + 1) + ". " + t.getName());
+        System.out.println("\nLEAGUE STANDINGS");
+        int pos = 1;
+        for (Team t : sortedTeams) {
+            System.out.println(pos + ". " + t.getName() + " | Points: " + t.getPoints() +
+                    " | GD: " + t.getGoalDifference() +
+                    " (Scored: " + t.getGoalsScored() + " / Conceded: " + t.getGoalsConceded() + ")");
+            pos++;
         }
-        System.out.println("========================\n");
     }
-
 
     public void printMatches(boolean showFinished) {
-        String title = showFinished ? "MATCH HISTORY (RESULTS)" : "UPCOMING MATCHES (SCHEDULE)";
-        System.out.println("\n=== " + title + " ===");
+        if (league.getMatches().isEmpty()) {
+            System.out.println("No matches scheduled yet.");
+            return;
+        }
 
+        System.out.println(showFinished ? "\nMATCH HISTORY" : "\nUPCOMING FIXTURES");
         boolean found = false;
         for (Match m : league.getMatches()) {
             if (m.isFinished() == showFinished) {
-                String score = m.isFinished() ? " | " + m.getHomeScore() + " - " + m.getAwayScore() : " | VS ";
+                String result = m.isFinished() ? m.getHomeScore() + " - " + m.getAwayScore() : "VS";
                 System.out.println("Round " + m.getMatchday() + ": " +
-                        m.getHomeTeam().getName() + score +
-                        m.getAwayTeam().getName() +
-                        " (Referee: " + m.getReferee().getLastName() + ")");
+                        m.getHomeTeam().getName() + " " + result + " " +
+                        m.getAwayTeam().getName());
                 found = true;
             }
         }
+        if (!found) System.out.println("No matches found for this category.");
+    }
 
-        if (!found) {
-            System.out.println("No matches to display in this category.");
+    public void printTopScoringTeam() {
+        if (league.getTeams().isEmpty()) {
+            System.out.println("No teams in the league.");
+            return;
         }
-        System.out.println("===============================\n");
+
+        Team topAttacker = league.getTeams().get(0);
+        for (Team t : league.getTeams()) {
+            if (t.getGoalsScored() > topAttacker.getGoalsScored()) {
+                topAttacker = t;
+            }
+        }
+
+        System.out.println("\nTOP SCORING TEAM");
+        System.out.println("The team with the best attack is " + topAttacker.getName() +
+                " with " + topAttacker.getGoalsScored() + " goals scored!");
+    }
+
+    public void printAllTeams() {
+        if (league.getTeams().isEmpty()) {
+            System.out.println("No teams registered in the league.");
+            return;
+        }
+
+        System.out.println("\nEXISTING TEAMS");
+        for (Team t : league.getTeams()) {
+            System.out.println("- " + t.getName() + " (Manager: " +
+                    (t.getManager() != null ? t.getManager().getLastName() : "No manager") + ")");
+        }
     }
 
     public League getLeague() { return league; }

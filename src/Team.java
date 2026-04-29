@@ -66,10 +66,6 @@ public class Team implements Comparable<Team> {
         }
         return true;
     }
-
-    public void setManager(Manager manager) {
-        this.manager = manager;
-    }
     public void addPlayer(Player player) {
         this.squad.add(player);
     }
@@ -116,4 +112,7 @@ public class Team implements Comparable<Team> {
     }
     public int getGoalsScored() { return this.goalsScored; }
     public int getGoalsConceded() { return this.concededGoals; }
+    public Manager getManager () { return this.manager; }
+    public void setManager (Manager manager) { this.manager = manager; }
+    public void setName (String name) { this.name = name; }
 }
