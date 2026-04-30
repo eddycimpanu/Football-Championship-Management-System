@@ -47,6 +47,7 @@ public class Team implements Comparable<Team> {
         throw new IllegalStateException("Error: The starting six of team " + this.name + " is already full ");
     }
 
+
     public void addPlayerToStartingSix(Player player, int position) {
         if (!this.squad.contains(player)) {
             throw new IllegalArgumentException("Error: " + player.getLastName() + " is not in the squad of team " + this.name );
@@ -56,6 +57,29 @@ public class Team implements Comparable<Team> {
             throw new IllegalArgumentException("Error: Invalid position (" + position + ")! It must be between 0 and 5");
         }
         this.startingSix[position] = player;
+    }
+
+    public boolean isPlayerStarting(Player p) {
+        for (Player starter : startingSix) {
+            if (starter != null && starter.equals(p)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean fillStartingSix() {
+        for (int i = 0; i < 6; i++) {
+            if (startingSix[i] == null) {
+                for (Player p : squad) {
+                    if (!isPlayerStarting(p)) {
+                        this.addPlayerToStartingSix(p, i);
+                        break;
+                    }
+                }
+            }
+        }
+        return isStartingSixFull();
     }
 
     public boolean isStartingSixFull() {
@@ -115,4 +139,5 @@ public class Team implements Comparable<Team> {
     public Manager getManager () { return this.manager; }
     public void setManager (Manager manager) { this.manager = manager; }
     public void setName (String name) { this.name = name; }
+    public void setBudget (double budget) { this.budget = budget; }
 }

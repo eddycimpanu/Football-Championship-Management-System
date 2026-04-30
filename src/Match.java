@@ -5,53 +5,89 @@ import java.util.List;
 public class Match {
     private Team homeTeam;
     private Team awayTeam;
-
     private Stadium stadium;
     private Referee referee;
-
     private Player[] homeStarters;
     private Player[] awayStarters;
-
     private List<Player> homeOnField;
     private List<Player> awayOnField;
-
     private List<MatchEvent> events;
     private int matchday;
-
     private int homeScore;
     private int awayScore;
     private boolean isFinished;
 
     public Match(Team homeTeam, Team awayTeam, Referee referee) {
-        if (!homeTeam.isStartingSixFull()) {
-            throw new IllegalStateException("Error: Home team " + homeTeam.getName() + " does not have a full starting six!");
-        }
-        if (!awayTeam.isStartingSixFull()) {
-            throw new IllegalStateException("Error: Away team " + awayTeam.getName() + " does not have a full starting six!");
-        }
-
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.referee = referee;
-
         this.stadium = homeTeam.getStadium();
+        this.events = new ArrayList<>();
 
-        this.homeStarters = Arrays.copyOf(homeTeam.getStartingSix(), homeTeam.getStartingSix().length);
-        this.awayStarters = Arrays.copyOf(awayTeam.getStartingSix(), awayTeam.getStartingSix().length);
+        if (homeTeam.getStartingSix() != null) {
+            this.homeStarters = Arrays.copyOf(homeTeam.getStartingSix(), homeTeam.getStartingSix().length);
+        } else {
+            this.homeStarters = new Player[0];
+        }
 
-        this.homeOnField = new ArrayList<>(Arrays.asList(this.homeStarters));
-        this.awayOnField = new ArrayList<>(Arrays.asList(this.awayStarters));
+        if (awayTeam.getStartingSix() != null) {
+            this.awayStarters = Arrays.copyOf(awayTeam.getStartingSix(), awayTeam.getStartingSix().length);
+        } else {
+            this.awayStarters = new Player[0];
+        }
+
+        this.homeOnField = new ArrayList<>();
+        for (Player p : homeStarters) {
+            if (p != null) homeOnField.add(p);
+        }
+
+        this.awayOnField = new ArrayList<>();
+        for (Player p : awayStarters) {
+            if (p != null) awayOnField.add(p);
+        }
 
         this.homeScore = 0;
         this.awayScore = 0;
         this.isFinished = false;
 
-        this.referee.addMatch();
+        if (this.referee != null) {
+            this.referee.addMatch();
+        }
+    }
+
+    public void displayEvents() {
+        System.out.println("\n=======================================");
+        System.out.println("   MATCH REPORT: " + homeTeam.getName() + " vs " + awayTeam.getName());
+        System.out.println("   FINAL SCORE: " + homeScore + " - " + awayScore);
+        System.out.println("=======================================");
+
+        if (events.isEmpty()) {
+            System.out.println("No major events recorded.");
+        } else {
+            for (MatchEvent event : events) {
+                int min = event.getMinute();
+
+                if (event instanceof Goal g) {
+                    System.out.println("Min " + min + ": GOAL! Scored by " + g.getScorer().getLastName());
+                }
+                else if (event instanceof Card c) {
+                    if (c.getColor().equalsIgnoreCase("Yellow")) {
+                        System.out.println("Min " + min + ": Yellow Card - " + c.getPerson().getLastName());
+                    } else {
+                        System.out.println("Min " + min + ": RED CARD! - " + c.getPerson().getLastName());
+                    }
+                }
+                else if (event instanceof Substitution s) {
+                    System.out.println("Min " + min + ": Sub: Out " + s.getPlayerOut().getLastName() + " / In " + s.getPlayerIn().getLastName());
+                }
+            }
+        }
+        System.out.println("=======================================");
     }
 
     private void _validateMatchState() {
         if (isFinished) {
-            throw new IllegalStateException("Error: Cannot add events. The match is already finished!");
+            throw new IllegalStateException("Error: The match is already finished!");
         }
     }
 
@@ -74,7 +110,7 @@ public class Match {
         } else if (awayOnField.contains(scorer)) {
             awayScore++;
         } else {
-            throw new IllegalArgumentException("Error: The scorer " + scorer.getLastName() + " is not currently on the field!");
+            throw new IllegalArgumentException("Error: Scorer " + scorer.getLastName() + " is not on the field!");
         }
 
         Goal goalEvent;
@@ -111,28 +147,21 @@ public class Match {
 
         if (offender instanceof Player) {
             Player p = (Player) offender;
-
             if (color.equalsIgnoreCase("Yellow")) {
                 p.addYellowCard();
-
                 if (yellowCountInThisMatch == 1) {
                     p.addRedCard();
-
                     homeOnField.remove(p);
                     awayOnField.remove(p);
-
                     events.add(new Card(minute, p, "Red"));
                 }
-
             } else if (color.equalsIgnoreCase("Red")) {
                 p.addRedCard();
                 homeOnField.remove(p);
                 awayOnField.remove(p);
             }
-
         } else if (offender instanceof Manager) {
             Manager m = (Manager) offender;
-
             if (color.equalsIgnoreCase("Yellow")) {
                 m.addYellowCard();
                 if (yellowCountInThisMatch == 1) {
@@ -150,41 +179,31 @@ public class Match {
 
         if (homeOnField.contains(playerOut)) {
             if (!homeTeam.getSquad().contains(playerIn)) {
-                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " does not belong to the home team's squad!");
+                throw new IllegalArgumentException("Error: Player does not belong to home team!");
             }
-
             if (homeOnField.contains(playerIn)) {
-                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " is already on the field!");
+                throw new IllegalArgumentException("Error: Player already on field!");
             }
-
             homeOnField.remove(playerOut);
             homeOnField.add(playerIn);
-
         } else if (awayOnField.contains(playerOut)) {
             if (!awayTeam.getSquad().contains(playerIn)) {
-                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " does not belong to the away team's squad!");
+                throw new IllegalArgumentException("Error: Player does not belong to away team!");
             }
-
             if (awayOnField.contains(playerIn)) {
-                throw new IllegalArgumentException("Error: Player " + playerIn.getLastName() + " is already on the field!");
+                throw new IllegalArgumentException("Error: Player already on field!");
             }
-
             awayOnField.remove(playerOut);
             awayOnField.add(playerIn);
-
         } else {
-            throw new IllegalArgumentException("Error: Player " + playerOut.getLastName() + " is not currently on the field!");
+            throw new IllegalArgumentException("Error: Player out is not on the field!");
         }
 
-        Substitution subEvent = new Substitution(minute, playerOut, playerIn);
-        events.add(subEvent);
+        events.add(new Substitution(minute, playerOut, playerIn));
     }
 
     public void finishMatch() {
-        if (isFinished) {
-            return;
-        }
-
+        if (isFinished) return;
         this.isFinished = true;
 
         homeTeam.updateGoals(homeScore, awayScore);
@@ -209,5 +228,4 @@ public class Match {
     public boolean isFinished() { return isFinished; }
     public Player[] getHomeStarters() { return homeStarters; }
     public Player[] getAwayStarters() { return awayStarters; }
-
 }
