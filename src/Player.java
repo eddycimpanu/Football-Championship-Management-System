@@ -58,6 +58,12 @@ public class Player extends Person implements Comparable<Player> {
     public void addCleanSheet() {
         this.cleanSheets++;
     }
+    public void addMinutesPlayed(int mins) {
+        this.minutesPlayed += mins;
+    }
+    public void incrementMatchesPlayed() {
+        this.matchesPlayed++;
+    }
 
     public String getPosition() { return position; }
     public int getKitNumber() { return kitNumber; }

@@ -228,4 +228,6 @@ public class Match {
     public boolean isFinished() { return isFinished; }
     public Player[] getHomeStarters() { return homeStarters; }
     public Player[] getAwayStarters() { return awayStarters; }
+    public List<Player> getHomeOnField() { return homeOnField; }
+    public List<Player> getAwayOnField() { return awayOnField; }
 }

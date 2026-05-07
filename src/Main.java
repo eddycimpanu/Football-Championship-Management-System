@@ -19,6 +19,7 @@ public class Main {
             System.out.println("6. Simulate Next Round");
             System.out.println("7. View Match Details");
             System.out.println("8. Show Standings");
+            System.out.println("9. View Player Statistics");
             System.out.println("0. Exit");
             System.out.print("Selection: ");
 
@@ -80,6 +81,7 @@ public class Main {
                         }
                     }
                 }
+                case 9 -> handleViewPlayerStats(service.getLeague(), scanner);
                 default -> System.out.println("Invalid selection.");
             }
         }
@@ -439,6 +441,38 @@ public class Main {
                 System.out.println("[ERROR] Please enter a valid number (e.g., 0.05)");
             }
         }
+    }
+    private static void handleViewPlayerStats(League league, Scanner scanner) {
+        System.out.print("\nEnter Player Last Name to search: ");
+        String searchName = scanner.nextLine();
+
+        boolean found = false;
+        System.out.println("\n--- SEARCH RESULTS ---");
+
+        for (Team team : league.getTeams()) {
+            for (Player p : team.getSquad()) {
+                if (p.getLastName().equalsIgnoreCase(searchName)) {
+                    found = true;
+                    System.out.println("Player: " + p.getFirstName() + " " + p.getLastName());
+                    System.out.println("Team: " + team.getName());
+                    System.out.println("Position: " + p.getPosition() + " | Kit: #" + p.getKitNumber());
+                    System.out.println("-------------------------");
+                    System.out.println("Minutes Played: " + p.getMinutesPlayed());
+                    System.out.println("Goals Scored:   " + p.getGoals());
+                    System.out.println("Assists:        " + p.getAssists());
+                    System.out.println("Yellow Cards:   " + p.getYellowCards());
+                    System.out.println("Red Cards:      " + p.getRedCards());
+                    System.out.println("-------------------------");
+                }
+            }
+        }
+
+        if (!found) {
+            System.out.println("[INFO] No player found with the name: " + searchName);
+        }
+
+        System.out.println("\nPress 0 to go back.");
+        while (!scanner.nextLine().equals("0"));
     }
 
     private static Team findTeam(League league, String name) {

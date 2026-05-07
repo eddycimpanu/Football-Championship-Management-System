@@ -105,21 +105,26 @@ public class LeagueService {
 
         for (Match match : roundMatches) {
             for (int min = 1; min <= 90; min++) {
+                for (Player p : match.getHomeOnField()) p.addMinutesPlayed(1);
+                for (Player p : match.getAwayOnField()) p.addMinutesPlayed(1);
+
                 if (dice.nextDouble() < league.getGoalChance()) {
                     Team t = dice.nextBoolean() ? match.getHomeTeam() : match.getAwayTeam();
-                    Player[] starters = (t == match.getHomeTeam()) ? match.getHomeStarters() : match.getAwayStarters();
-                    if (starters.length > 0) {
-                        Player p = starters[dice.nextInt(starters.length)];
-                        if (p != null) match.addGoal(min, p);
+                    List<Player> activePlayers = (t == match.getHomeTeam()) ? match.getHomeOnField() : match.getAwayOnField();
+
+                    if (!activePlayers.isEmpty()) {
+                        Player p = activePlayers.get(dice.nextInt(activePlayers.size()));
+                        match.addGoal(min, p);
                     }
                 }
 
                 if (dice.nextDouble() < league.getYellowCardChance()) {
                     Team t = dice.nextBoolean() ? match.getHomeTeam() : match.getAwayTeam();
-                    Player[] starters = (t == match.getHomeTeam()) ? match.getHomeStarters() : match.getAwayStarters();
-                    if (starters.length > 0) {
-                        Player p = starters[dice.nextInt(starters.length)];
-                        if (p != null) match.addCard(min, p, "Yellow");
+                    List<Player> activePlayers = (t == match.getHomeTeam()) ? match.getHomeOnField() : match.getAwayOnField();
+
+                    if (!activePlayers.isEmpty()) {
+                        Player p = activePlayers.get(dice.nextInt(activePlayers.size()));
+                        match.addCard(min, p, "Yellow");
                     }
                 }
 
@@ -139,17 +144,21 @@ public class LeagueService {
     private void simulateRandomSubstitution(Match match, int min, Random dice) {
         try {
             Team t = dice.nextBoolean() ? match.getHomeTeam() : match.getAwayTeam();
-            Player[] starters = (t == match.getHomeTeam()) ? match.getHomeStarters() : match.getAwayStarters();
+            List<Player> onField = (t == match.getHomeTeam()) ? match.getHomeOnField() : match.getAwayOnField();
             List<Player> squadList = new ArrayList<>(t.getSquad());
 
-            if (starters.length > 0 && squadList.size() > 6) {
-                Player pOut = starters[dice.nextInt(starters.length)];
-                Player pIn = squadList.get(dice.nextInt(squadList.size()));
+            if (!onField.isEmpty() && squadList.size() > onField.size()) {
+                Player pOut = onField.get(dice.nextInt(onField.size()));
 
-                boolean isAlreadyIn = false;
-                for(Player s : starters) if(s == pIn) isAlreadyIn = true;
+                List<Player> bench = new ArrayList<>();
+                for (Player p : squadList) {
+                    if (!onField.contains(p)) {
+                        bench.add(p);
+                    }
+                }
 
-                if (pOut != null && pIn != null && !isAlreadyIn) {
+                if (!bench.isEmpty()) {
+                    Player pIn = bench.get(dice.nextInt(bench.size()));
                     match.addSubstitution(min, pOut, pIn);
                 }
             }
