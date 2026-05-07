@@ -68,7 +68,11 @@ public class Match {
                 int min = event.getMinute();
 
                 if (event instanceof Goal g) {
-                    System.out.println("Min " + min + ": GOAL! Scored by " + g.getScorer().getLastName());
+                    String goalOutput = "Min " + min + ": GOAL! Scored by " + g.getScorer().getLastName();
+                    if (g.getAssistant() != null) {
+                        goalOutput += " (Assist: " + g.getAssistant().getLastName() + ")";
+                    }
+                    System.out.println(goalOutput);
                 }
                 else if (event instanceof Card c) {
                     if (c.getColor().equalsIgnoreCase("Yellow")) {
@@ -131,6 +135,12 @@ public class Match {
 
     public void addCard(int minute, Person offender, String color) {
         _validateMatchState();
+
+
+        if (this.referee != null) {
+            if (color.equalsIgnoreCase("Yellow")) this.referee.addYellowCard();
+            else if (color.equalsIgnoreCase("Red")) this.referee.addRedCard();
+        }
 
         int yellowCountInThisMatch = 0;
         for (MatchEvent event : events) {

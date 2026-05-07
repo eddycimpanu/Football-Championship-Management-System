@@ -14,12 +14,13 @@ public class Main {
             System.out.println("1. Teams Management");
             System.out.println("2. Generate Matches");
             System.out.println("3. Auto-complete Starting Lineups");
-            System.out.println("4. Add Referee");
+            System.out.println("4. Referees Management");
             System.out.println("5. Manage Probabilities");
             System.out.println("6. Simulate Next Round");
             System.out.println("7. View Match Details");
             System.out.println("8. Show Standings");
             System.out.println("9. View Player Statistics");
+            System.out.println("10. Player Statistics Rankings");
             System.out.println("0. Exit");
             System.out.print("Selection: ");
 
@@ -42,7 +43,7 @@ public class Main {
                         }
                     }
                 }
-                case 4 -> handleAddReferee(service.getLeague(),scanner);
+                case 4 -> handleRefereesManagement(service.getLeague(), scanner);
                 case 5 -> handleProbabilities(service.getLeague(), scanner);
                 case 6 -> {
                     if (!service.getLeague().isScheduleGenerated()) {
@@ -82,6 +83,7 @@ public class Main {
                     }
                 }
                 case 9 -> handleViewPlayerStats(service.getLeague(), scanner);
+                case 10 -> service.handleStatisticsMenu(scanner);
                 default -> System.out.println("Invalid selection.");
             }
         }
@@ -103,17 +105,13 @@ public class Main {
             switch (choice) {
                 case 1 -> {
                     System.out.println("\nENTER TEAM DETAILS");
-
                     System.out.print("Team Name: ");
                     String name = scanner.nextLine();
-
                     System.out.print("Founding Year: ");
                     int year = getInt(scanner);
-
                     System.out.print("Initial Budget: ");
                     double budget = scanner.nextDouble();
                     scanner.nextLine();
-
                     Team newTeam = new Team(name, year, budget);
                     league.addTeam(newTeam);
                 }
@@ -127,7 +125,6 @@ public class Main {
                         }
                         System.out.println("0. Cancel");
                         System.out.print("Write the number of the team to remove: ");
-
                         int teamIdx = getInt(scanner);
                         if (teamIdx > 0 && teamIdx <= league.getTeams().size()) {
                             Team removed = league.getTeams().remove(teamIdx - 1);
@@ -147,7 +144,6 @@ public class Main {
                         }
                         System.out.println("0. Back");
                         System.out.print("Selection: ");
-
                         int teamIdx = getInt(scanner);
                         if (teamIdx > 0 && teamIdx <= league.getTeams().size()) {
                             handleTeamActions(league.getTeams().get(teamIdx - 1), scanner);
@@ -193,7 +189,6 @@ public class Main {
                         if (getInt(scanner) == 0) break;
                     }
                 }
-
                 case 2 -> {
                     while (true) {
                         System.out.println("\n--- STARTING LINEUP VIEW ---");
@@ -209,7 +204,6 @@ public class Main {
                         if (getInt(scanner) == 0) break;
                     }
                 }
-
                 case 3 -> {
                     Player[] starters = team.getStartingSix();
                     java.util.List<Player> reserves = new java.util.ArrayList<>();
@@ -223,7 +217,6 @@ public class Main {
                         }
                         if (!isStarting) reserves.add(p);
                     }
-
                     if (reserves.isEmpty()) {
                         System.out.println("No reserves available for substitution!");
                     } else {
@@ -233,7 +226,6 @@ public class Main {
                         }
                         System.out.print("\nSelect RESERVE to enter (0 to cancel): ");
                         int resIdx = getInt(scanner) - 1;
-
                         if (resIdx >= 0 && resIdx < reserves.size()) {
                             Player reserveEntering = reserves.get(resIdx);
                             System.out.println("\n--- CURRENT STARTERS ---");
@@ -245,7 +237,6 @@ public class Main {
                             }
                             System.out.print("\nSelect STARTER position to replace (1-6): ");
                             int starIdx = getInt(scanner) - 1;
-
                             if (starIdx >= 0 && starIdx < 6) {
                                 Player playerExiting = starters[starIdx];
                                 team.addPlayerToStartingSix(reserveEntering, starIdx);
@@ -258,7 +249,6 @@ public class Main {
                         }
                     }
                 }
-
                 case 4 -> {
                     System.out.println("\n--- REGISTER NEW PLAYER ---");
                     System.out.print("Last Name: ");
@@ -271,7 +261,6 @@ public class Main {
                     String nat = scanner.nextLine();
                     System.out.print("Position: ");
                     String pos = scanner.nextLine();
-
                     int kit;
                     while (true) {
                         System.out.print("Kit Number: ");
@@ -289,7 +278,6 @@ public class Main {
                     team.addPlayer(new Player(ln, fn, age, nat, pos, kit));
                     System.out.println("Player registered successfully!");
                 }
-
                 case 5 -> {
                     if (team.getSquad().isEmpty()) {
                         System.out.println("Squad is empty.");
@@ -306,26 +294,19 @@ public class Main {
                         }
                     }
                 }
-
                 case 6 -> {
                     System.out.println("\n--- ASSIGN NEW MANAGER ---");
-
                     System.out.print("Last Name: ");
                     String last_name = scanner.nextLine();
-
                     System.out.print("First Name: ");
                     String first_name = scanner.nextLine();
-
                     System.out.print("Age: ");
                     int age = getInt(scanner);
-
                     System.out.print("Nationality: ");
                     String nationality = scanner.nextLine();
-
                     team.setManager(new Manager(last_name, first_name, age, nationality));
                     System.out.println("Manager " + last_name + " " + first_name + " is now officially in charge of " + team.getName() + "!");
                 }
-
                 case 7 -> {
                     System.out.print("Enter new budget: ");
                     double b = scanner.nextDouble();
@@ -333,23 +314,17 @@ public class Main {
                     team.setBudget(b);
                     System.out.println("Budget updated.");
                 }
-
                 case 8 -> {
                     System.out.println("\n--- UPDATE STADIUM INFO ---");
-
                     System.out.print("Stadium Name: ");
                     String stadium_name = scanner.nextLine();
-
                     System.out.print("City: ");
                     String city = scanner.nextLine();
-
                     System.out.print("Capacity: ");
                     int capacity = getInt(scanner);
-
                     team.setStadium(new Stadium(stadium_name, city, capacity));
                     System.out.println("Success: " + team.getName() + " now plays at " + stadium_name + " in " + city + " (" + capacity + " seats).");
                 }
-
                 default -> System.out.println("Invalid option.");
             }
         }
@@ -363,13 +338,10 @@ public class Main {
             } else {
                 System.out.println("\n[INFO] Schedule is already active.");
             }
-
             service.printMatches();
-
         } catch (IllegalStateException e) {
             System.out.println("\n[ERROR] " + e.getMessage());
         }
-
         System.out.println("\nPress 0 to go back.");
         while (true) {
             try {
@@ -381,31 +353,68 @@ public class Main {
         }
     }
 
-    private static void handleAddReferee(League league, Scanner scanner) {
-        System.out.println("\n--- ADD NEW REFEREE ---");
+    private static void handleRefereesManagement(League league, Scanner scanner) {
+        while (true) {
+            System.out.println("\n--- REFEREES MANAGEMENT ---");
+            System.out.println("1. Add Referee");
+            System.out.println("2. Remove Referee");
+            System.out.println("3. Show Referee Statistics");
+            System.out.println("0. Back");
+            System.out.print("Selection: ");
 
-        System.out.print("First Name: ");
-        String firstName = scanner.nextLine();
+            int choice = getInt(scanner);
+            if (choice == 0) break;
 
-        System.out.print("Last Name: ");
-        String lastName = scanner.nextLine();
-
-        System.out.print("Age: ");
-        int age = Integer.parseInt(scanner.nextLine());
-
-        System.out.print("Nationality: ");
-        String nationality = scanner.nextLine();
-
-        try {
-            Referee newRef = new Referee(firstName, lastName, age, nationality);
-            league.addReferee(newRef);
-            System.out.println("\n[SUCCESS] Referee " + lastName + " has been added to the league.");
-        } catch (Exception e) {
-            System.out.println("\n[ERROR] Could not add referee: " + e.getMessage());
+            switch (choice) {
+                case 1 -> {
+                    System.out.println("\n--- ADD NEW REFEREE ---");
+                    System.out.print("First Name: ");
+                    String fn = scanner.nextLine();
+                    System.out.print("Last Name: ");
+                    String ln = scanner.nextLine();
+                    System.out.print("Age: ");
+                    int age = getInt(scanner);
+                    System.out.print("Nationality: ");
+                    String nat = scanner.nextLine();
+                    league.addReferee(new Referee(fn, ln, age, nat));
+                    System.out.println("[SUCCESS] Referee added.");
+                }
+                case 2 -> {
+                    if (league.getReferees().isEmpty()) {
+                        System.out.println("No referees to remove.");
+                    } else {
+                        for (int i = 0; i < league.getReferees().size(); i++) {
+                            System.out.println((i + 1) + ". " + league.getReferees().get(i).getLastName());
+                        }
+                        System.out.print("Select index to remove (0 to cancel): ");
+                        int idx = getInt(scanner) - 1;
+                        if (idx >= 0 && idx < league.getReferees().size()) league.getReferees().remove(idx);
+                    }
+                }
+                case 3 -> {
+                    if (league.getReferees().isEmpty()) {
+                        System.out.println("No referees in the league.");
+                    } else {
+                        System.out.println("\n--- SELECT REFEREE TO VIEW STATS ---");
+                        for (int i = 0; i < league.getReferees().size(); i++) {
+                            System.out.println((i + 1) + ". " + league.getReferees().get(i).getLastName());
+                        }
+                        System.out.print("Selection: ");
+                        int idx = getInt(scanner) - 1;
+                        if (idx >= 0 && idx < league.getReferees().size()) {
+                            Referee r = league.getReferees().get(idx);
+                            System.out.println("\n--- STATS FOR " + r.getLastName() + " " + r.getFirstName() + " ---");
+                            System.out.println("Matches Officiated: " + r.getMatchesOfficiated());
+                            System.out.println("Yellow Cards Given: " + r.getYellowCardsGiven());
+                            System.out.println("Red Cards Given:    " + r.getRedCardsGiven());
+                        }
+                    }
+                    System.out.println("\nPress 0 to go back.");
+                    while (!scanner.nextLine().equals("0"));
+                }
+                default -> System.out.println("Invalid choice.");
+            }
         }
-
-        System.out.println("\nPress 0 to return.");
-        while (!scanner.nextLine().equals("0"));
     }
 
     private static void handleProbabilities(League league, java.util.Scanner scanner) {
@@ -416,10 +425,8 @@ public class Main {
             System.out.println("3. Substitution Base Chance [" + league.getSubstitutionBaseChance() + "]");
             System.out.println("0. Back to Main Menu");
             System.out.print("Selection: ");
-
             String choice = scanner.nextLine();
             if (choice.equals("0")) break;
-
             try {
                 switch (choice) {
                     case "1" -> {
@@ -442,13 +449,12 @@ public class Main {
             }
         }
     }
+
     private static void handleViewPlayerStats(League league, Scanner scanner) {
         System.out.print("\nEnter Player Last Name to search: ");
         String searchName = scanner.nextLine();
-
         boolean found = false;
         System.out.println("\n--- SEARCH RESULTS ---");
-
         for (Team team : league.getTeams()) {
             for (Player p : team.getSquad()) {
                 if (p.getLastName().equalsIgnoreCase(searchName)) {
@@ -466,20 +472,9 @@ public class Main {
                 }
             }
         }
-
-        if (!found) {
-            System.out.println("[INFO] No player found with the name: " + searchName);
-        }
-
+        if (!found) System.out.println("[INFO] No player found with the name: " + searchName);
         System.out.println("\nPress 0 to go back.");
         while (!scanner.nextLine().equals("0"));
-    }
-
-    private static Team findTeam(League league, String name) {
-        for (Team t : league.getTeams()) {
-            if (t.getName().equalsIgnoreCase(name)) return t;
-        }
-        return null;
     }
 
     private static int getInt(Scanner scanner) {

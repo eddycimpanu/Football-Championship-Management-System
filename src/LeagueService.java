@@ -113,8 +113,16 @@ public class LeagueService {
                     List<Player> activePlayers = (t == match.getHomeTeam()) ? match.getHomeOnField() : match.getAwayOnField();
 
                     if (!activePlayers.isEmpty()) {
-                        Player p = activePlayers.get(dice.nextInt(activePlayers.size()));
-                        match.addGoal(min, p);
+                        Player scorer = activePlayers.get(dice.nextInt(activePlayers.size()));
+                        Player assistant = null;
+
+                        if (activePlayers.size() > 1 && dice.nextDouble() < 0.7) {
+                            do {
+                                assistant = activePlayers.get(dice.nextInt(activePlayers.size()));
+                            } while (assistant == scorer);
+                        }
+
+                        match.addGoal(min, scorer, assistant);
                     }
                 }
 
@@ -209,6 +217,69 @@ public class LeagueService {
                     t.getPoints() + " points | " +
                     t.getGoalsScored() + " goals scored | " +
                     t.getGoalsConceded() + " goals conceded )");
+        }
+    }
+
+    public void handleStatisticsMenu(java.util.Scanner scanner) {
+        while (true) {
+            System.out.println("\n--- PLAYER RANKINGS ---");
+            System.out.println("1. Top Scorers (Goals)");
+            System.out.println("2. Top Playmakers (Assists)");
+            System.out.println("3. Top Workhorses (Minutes)");
+            System.out.println("0. Back to Main Menu");
+            System.out.print("Selection: ");
+
+            int choice;
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (Exception e) {
+                continue;
+            }
+
+            if (choice == 0) break;
+
+            List<Player> allPlayers = new ArrayList<>();
+            for (Team team : league.getTeams()) {
+                allPlayers.addAll(team.getSquad());
+            }
+
+            if (allPlayers.isEmpty()) {
+                System.out.println("[INFO] No players found in the league.");
+                continue;
+            }
+
+            String label = "";
+            switch (choice) {
+                case 1 -> {
+                    allPlayers.sort((p1, p2) -> Integer.compare(p2.getGoals(), p1.getGoals()));
+                    label = "goals";
+                }
+                case 2 -> {
+                    allPlayers.sort((p1, p2) -> Integer.compare(p2.getAssists(), p1.getAssists()));
+                    label = "assists";
+                }
+                case 3 -> {
+                    allPlayers.sort((p1, p2) -> Integer.compare(p2.getMinutesPlayed(), p1.getMinutesPlayed()));
+                    label = "minutes";
+                }
+                default -> {
+                    System.out.println("Invalid selection.");
+                    continue;
+                }
+            }
+
+            System.out.println("\n--- TOP 5 ---");
+            int limit = Math.min(5, allPlayers.size());
+            for (int i = 0; i < limit; i++) {
+                Player p = allPlayers.get(i);
+                int value = switch (choice) {
+                    case 1 -> p.getGoals();
+                    case 2 -> p.getAssists();
+                    case 3 -> p.getMinutesPlayed();
+                    default -> 0;
+                };
+                System.out.println((i + 1) + ". " + p.getLastName() + " - " + value + " " + label);
+            }
         }
     }
 
